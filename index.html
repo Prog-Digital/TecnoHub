@@ -6,13 +6,32 @@
   <title>TecnoHub - Plataforma Tecnológica</title>
   <link rel="stylesheet" href="./style.css">
   <style>
-    /* Estilos sólidos y profesionales para las tarjetas */
-    .hero-card {
+    /* Estilos para el contenedor principal de bienvenida con logo centrado */
+    .hero-container {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem 1.5rem;
+      max-width: 900px;
+      margin: 2rem auto;
       background: rgba(30, 41, 59, 0.95);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 1rem;
       backdrop-filter: blur(12px);
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .hero-logo {
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 50%;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      border: 2px solid rgba(56, 189, 248, 0.5);
+      margin-bottom: 1.5rem;
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7); }
+      100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
     }
     .carrusel-container {
       position: relative;
@@ -31,7 +50,6 @@
       background-position: center;
       position: relative;
     }
-    /* Capa oscura sólida para garantizar que la imagen de fondo no opaque el texto */
     .carrusel-slide::before {
       content: '';
       position: absolute;
@@ -89,21 +107,21 @@
   </style>
 </head>
 <body>
-<header style="display: flex; justify-content: space-between; align- items: center; padding: 0.8rem 2rem; border-bottom: 1px solid var(--border-color); background: rgba(11,17,32,0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;">
-  <div class="logo" style="display: flex; align-items: center; gap: 0.75rem;">
-    <img src="./logo.png" alt="TecnoHub Logo" style="height: 42px; width: auto; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.4));">
-    <span style="font-weight: bold; font-size: 1.2rem; color: var(--primary); tracking-spacing: 1px;">TECNOHUB</span>
-  </div>
-  <nav style="display: flex; gap: 1.5rem; align-items: center;">
-    <a href="index.html" style="color: #cbd5e1; text-decoration: none;">Inicio</a>
-    <a href="dashboard.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Panel CRUD</a>
-    <a href="login.html" class="btn" style="background: #ef4444; color: white; padding: 0.4rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.9rem;">Cerrar Sesión</a>
-  </nav>
-</header>
+  <header>
+    <div class="logo" style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-weight: bold; font-size: 1.2rem; color: #38bdf8;">⚡ TECNOHUB</span>
+    </div>
+    <nav>
+      <a href="index.html" class="active">Inicio</a>
+      <a href="dashboard.html">Gestión de Solicitudes</a>
+      <a href="login.html" class="btn" style="padding: 0.5rem 1rem;">Acceder</a>
+    </nav>
+  </header>
 
   <main style="padding: 0 1rem;">
-    <!-- Tarjeta Principal de Bienvenida -->
-    <section class="hero-card" style="text-align: center; padding: 3rem 1.5rem; max-width: 900px; margin: 2rem auto;">
+    <!-- Tarjeta Principal con Logo Centrado -->
+    <section class="hero-container">
+      <img src="./logo.png" alt="TecnoHub Logo" class="hero-logo">
       <h1 style="font-size: 2.3rem; color: #38bdf8; margin-bottom: 1rem;">Gestión Fluida de Servicios Tecnológicos</h1>
       <p style="color: #cbd5e1; max-width: 650px; margin: 0 auto 1.5rem auto; font-size: 1.1rem; line-height: 1.6;">
         Plataforma web desarrollada para la asignatura de Programación Digital (UNIPAZ). Conecta necesidades técnicas con soluciones eficientes en tiempo real.
@@ -111,7 +129,7 @@
       <a href="dashboard.html" class="btn" style="padding: 0.75rem 2rem; font-size: 1rem; display: inline-block;">Ir al Panel CRUD</a>
     </section>
 
-    <!-- Carrusel Interactivo con Fondos de Imágenes -->
+    <!-- Carrusel Interactivo de Servicios -->
     <div class="carrusel-container">
       
       <!-- Slide 1 -->

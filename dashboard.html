@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TecnoHub - Panel de Gestión</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Cliente JS de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">⚡ TECNOHUB</div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="dashboard.html" class="active">Panel CRUD</a>
+      <a href="login.html" class="btn" style="padding: 0.5rem 1rem;">Cerrar Sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Formulario Crear/Editar -->
+     <!-- Tarjetas de Métricas Resumen -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Total Solicitudes</p>
+    <h3 id="statTotal" style="font-size: 1.8rem; color: var(--primary); margin: 0.25rem 0 0 0;">0</h3>
+  </div>
+  <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Pendientes</p>
+    <h3 id="statPendientes" style="font-size: 1.8rem; color: var(--warning); margin: 0.25rem 0 0 0;">0</h3>
+  </div>
+  <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Completadas</p>
+    <h3 id="statCompletadas" style="font-size: 1.8rem; color: var(--success); margin: 0.25rem 0 0 0;">0</h3>
+  </div>
+</div>
+    <section class="card">
+      <h2>Registrar / Editar Solicitud</h2>
+      <form id="solicitudForm">
+        <input type="hidden" id="solicitudId">
+        <div class="form-group">
+          <label for="titulo">Título del Requerimiento</label>
+          <input type="text" id="titulo" required placeholder="Ej: Mantenimiento Preventivo de Redes">
+        </div>
+        <div class="form-group">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" required>
+            <option value="">-- Seleccionar Categoría --</option>
+            <option value="Soporte Técnico">Soporte Técnico</option>
+            <option value="Desarrollo Software">Desarrollo Software</option>
+            <option value="Redes y Conectividad">Redes y Conectividad</option>
+            <option value="Mantenimiento Electromecánico">Mantenimiento Electromecánico</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" rows="3" required placeholder="Detalle los requerimientos del servicio..."></textarea>
+        </div>
+        <button type="submit" class="btn" id="btnGuardar">Guardar Solicitud</button>
+      </form>
+    </section>
+
+    <!-- Tabla y Búsqueda -->
+    <section class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <h2>Solicitudes Registradas</h2>
+        <input type="text" id="busquedaInput" placeholder="Buscar..." style="max-width: 250px;">
+      </div>
+      
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título y Descripción</th>
+              <th>Categoría</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaSolicitudes">
+            <!-- Cargado por app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+
+  <!-- SweetAlert2 CDN para notificaciones estéticas -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="app.js"></script>
+</body>
+</html>

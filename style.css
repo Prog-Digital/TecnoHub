@@ -7,6 +7,7 @@
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.1);
   --danger: #ef4444;
+  --warning: #eab308;
   --success: #22c55e;
 }
 
@@ -26,7 +27,7 @@ body {
 }
 
 header {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-color);
   padding: 1rem 2rem;
@@ -40,7 +41,7 @@ header {
 
 .logo {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
   color: var(--primary);
   letter-spacing: 1px;
 }
@@ -50,9 +51,10 @@ nav a {
   text-decoration: none;
   margin-left: 1.5rem;
   transition: color 0.3s;
+  font-weight: 500;
 }
 
-nav a:hover {
+nav a:hover, nav a.active {
   color: var(--primary);
 }
 
@@ -86,12 +88,32 @@ h1, h2, h3 {
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .btn:hover {
   background-color: var(--primary-hover);
   transform: translateY(-2px);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-warning {
+  background-color: var(--warning);
+  color: #0f172a;
+}
+
+.btn-warning:hover {
+  background-color: #ca8a04;
 }
 
 .form-group {
@@ -142,6 +164,6 @@ th {
     gap: 1rem;
   }
   nav a {
-    margin: 0 0.75rem;
+    margin: 0 0.5rem;
   }
 }

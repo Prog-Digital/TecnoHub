@@ -2,10 +2,8 @@
 const SUPABASE_URL = 'https://whxqmqawhatettkgqvjj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ASvOTj8NswAJpYyPkw9SNw_5zB4_pOS';
 
-// Inicialización del Cliente Oficial de Supabase
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variables globales para datos y gráficos
 let solicitudesGlobal = [];
 let miGraficoChart = null;
 
@@ -13,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('tablaSolicitudes')) {
     obtenerSolicitudes();
 
-    // Evento Submit: Guardar (Crear o Editar)
     const form = document.getElementById('solicitudForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -21,9 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = document.getElementById('solicitudId').value;
       const titulo = document.getElementById('titulo').value.trim();
       const categoria = document.getElementById('categoria').value;
+      const prioridad = document.getElementById('prioridad').value;
       const descripcion = document.getElementById('descripcion').value.trim();
 
-      if (!titulo || !categoria || !descripcion) {
+      if (!titulo || !categoria || !prioridad || !descripcion) {
         Swal.fire({
           icon: 'warning',
           title: 'Campos incompletos',
@@ -36,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (id) {
-        // ACTUALIZAR (Update)
+        // ACTUALIZAR
         const { error } = await supabaseClient
           .from('solicitudes')
-          .update({ titulo, categoria, descripcion })
+          .update({ titulo, categoria, prioridad, descripcion })
           .eq('id_solicitud', id);
 
         if (error) {
@@ -48,10 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
           notificarExito('¡Solicitud actualizada con éxito!');
         }
       } else {
-        // CREAR (Insert)
+        // CREAR
         const { error } = await supabaseClient
           .from('solicitudes')
-          .insert([{ titulo, categoria, descripcion, estado: 'Pendiente' }]);
+          .insert([{ titulo, categoria, prioridad, descripcion, estado: 'Pendiente' }]);
 
         if (error) {
           Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1e293b', color: '#f8fafc' });
@@ -60,26 +58,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      form.reset();
-      document.getElementById('solicitudId').value = '';
-      document.getElementById('btnGuardar').textContent = 'Guardar Solicitud';
+      limpiarFormulario();
       obtenerSolicitudes();
     });
 
-    // Listeners de Filtros y Búsqueda en Tiempo Real
     document.getElementById('busquedaInput')?.addEventListener('input', aplicarFiltros);
     document.getElementById('filtroEstado')?.addEventListener('change', aplicarFiltros);
   }
 });
 
-// LISTAR Registros desde Supabase
+// LISTAR Registros
 async function obtenerSolicitudes() {
   const tbody = document.getElementById('tablaSolicitudes');
   if (!tbody) return;
 
   Swal.fire({
     title: 'Cargando datos...',
-    text: 'Conectando con Supabase',
+    text: 'Sincronizando con Supabase',
     allowOutsideClick: false,
     background: '#1e293b',
     color: '#f8fafc',
@@ -97,7 +92,7 @@ async function obtenerSolicitudes() {
 
   if (error) {
     console.error('Error:', error.message);
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--danger);">Error al cargar datos desde Supabase.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: #ef4444;">Error al cargar datos desde Supabase.</td></tr>`;
     return;
   }
 
@@ -106,40 +101,44 @@ async function obtenerSolicitudes() {
   aplicarFiltros();
 }
 
-// Renderizar la tabla basada en filtros
+// Renderizar Tabla
 function renderizarTabla(datos) {
   const tbody = document.getElementById('tablaSolicitudes');
   tbody.innerHTML = '';
 
   if (datos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 2rem;">No se encontraron solicitudes registradas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: #94a3b8; padding: 2rem;">No se encontraron solicitudes registradas.</td></tr>`;
     return;
   }
 
   datos.forEach((item) => {
+    // Color según prioridad
+    let badgeColor = '#3b82f6'; // Media
+    if (item.prioridad === 'Alta') badgeColor = '#ef4444';
+    if (item.prioridad === 'Baja') badgeColor = '#10b981';
+
     const tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid var(--border-color)';
     tr.innerHTML = `
-      <td style="padding: 0.75rem;">#${item.id_solicitud}</td>
-      <td style="padding: 0.75rem;"><strong>${item.titulo}</strong><br><small style="color:var(--text-muted);">${item.descripcion}</small></td>
-      <td style="padding: 0.75rem;">${item.categoria}</td>
-      <td style="padding: 0.75rem;">
-        <select onchange="cambiarEstado(${item.id_solicitud}, this.value)" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; border-radius: 0.25rem; background: #0f172a; color: #f8fafc; border: 1px solid var(--border-color);">
+      <td>#${item.id_solicitud}</td>
+      <td><strong>${item.titulo}</strong><br><small style="color:#94a3b8;">${item.descripcion}</small></td>
+      <td>${item.categoria}<br><span style="font-size:0.75rem; background:${badgeColor}; color:#fff; padding:0.1rem 0.4rem; border-radius:0.25rem;">Prioridad: ${item.prioridad || 'Media'}</span></td>
+      <td>
+        <select onchange="cambiarEstado(${item.id_solicitud}, this.value)" style="padding: 0.3rem; font-size: 0.85rem; border-radius: 0.25rem; background: #0f172a; color: #f8fafc; border: 1px solid var(--border-color);">
           <option value="Pendiente" ${item.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
           <option value="En Proceso" ${item.estado === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
           <option value="Completada" ${item.estado === 'Completada' ? 'selected' : ''}>Completada</option>
         </select>
       </td>
-      <td style="padding: 0.75rem;">
-        <button onclick="prepararEdicion(${item.id_solicitud}, '${item.titulo.replace(/'/g, "\\'")}', '${item.categoria}', '${item.descripcion.replace(/'/g, "\\'")}')" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">Editar</button>
-        <button onclick="eliminarSolicitud(${item.id_solicitud})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-left: 0.25rem;">Eliminar</button>
+      <td>
+        <button onclick="prepararEdicion(${item.id_solicitud}, '${item.titulo.replace(/'/g, "\\'")}', '${item.categoria}', '${item.prioridad || 'Media'}', '${item.descripcion.replace(/'/g, "\\'")}')" class="btn btn-warning" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; background: #f59e0b; color: #0b1120; font-weight:600; border:none; border-radius:0.25rem; cursor:pointer;">Editar</button>
+        <button onclick="eliminarSolicitud(${item.id_solicitud})" class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; background: #ef4444; color: #fff; font-weight:600; border:none; border-radius:0.25rem; cursor:pointer; margin-left: 0.25rem;">Eliminar</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// Aplicar filtros combinados (Texto + Estado)
+// Filtros combinados
 function aplicarFiltros() {
   const termino = document.getElementById('busquedaInput')?.value.toLowerCase() || '';
   const estadoFiltro = document.getElementById('filtroEstado')?.value || 'TODOS';
@@ -157,7 +156,7 @@ function aplicarFiltros() {
   renderizarTabla(filtrados);
 }
 
-// Actualizar Tarjetas Numericas y Gráfico de Torta (Chart.js)
+// Métricas y Gráfica Chart.js en tamaño perfecto
 function actualizarMetricasYGrafico(data) {
   const pendientes = data.filter(s => s.estado === 'Pendiente').length;
   const enProceso = data.filter(s => s.estado === 'En Proceso').length;
@@ -169,7 +168,6 @@ function actualizarMetricasYGrafico(data) {
     document.getElementById('statCompletadas').textContent = completadas;
   }
 
-  // Renderizar o actualizar Chart.js
   const ctx = document.getElementById('estadoChart');
   if (!ctx) return;
 
@@ -190,16 +188,18 @@ function actualizarMetricasYGrafico(data) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
-          labels: { color: '#f8fafc' }
+          position: 'bottom',
+          labels: { color: '#f8fafc', font: { size: 11 } }
         }
       }
     }
   });
 }
 
-// Cambiar Estado desde la Tabla
+// Cambiar Estado
 window.cambiarEstado = async function(id, nuevoEstado) {
   const { error } = await supabaseClient
     .from('solicitudes')
@@ -214,21 +214,31 @@ window.cambiarEstado = async function(id, nuevoEstado) {
   }
 };
 
-// Cargar Datos al Formulario para Editar
-window.prepararEdicion = function (id, titulo, categoria, descripcion) {
+// Preparar Edición
+window.prepararEdicion = function (id, titulo, categoria, prioridad, descripcion) {
   document.getElementById('solicitudId').value = id;
   document.getElementById('titulo').value = titulo;
   document.getElementById('categoria').value = categoria;
+  document.getElementById('prioridad').value = prioridad;
   document.getElementById('descripcion').value = descripcion;
+  document.getElementById('formTitle').textContent = '✏️ Editar Requerimiento';
   document.getElementById('btnGuardar').textContent = 'Actualizar Solicitud';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// Eliminar Solicitud con Confirmación
+// Limpiar Formulario
+window.limpiarFormulario = function() {
+  document.getElementById('solicitudForm').reset();
+  document.getElementById('solicitudId').value = '';
+  document.getElementById('formTitle').textContent = '📝 Registrar Requerimiento';
+  document.getElementById('btnGuardar').textContent = 'Guardar Solicitud';
+};
+
+// Eliminar
 window.eliminarSolicitud = async function (id) {
   Swal.fire({
     title: '¿Estás seguro?',
-    text: `¿Deseas eliminar la solicitud #${id}? Esta acción es irreversible.`,
+    text: `¿Deseas eliminar la solicitud #${id}?`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#ef4444',
@@ -254,19 +264,19 @@ window.eliminarSolicitud = async function (id) {
   });
 };
 
-// Exportar Datos de la Tabla a Archivo CSV (Excel)
+// Exportar CSV
 window.exportarCSV = function() {
   if (solicitudesGlobal.length === 0) {
     Swal.fire({ icon: 'info', title: 'Sin datos', text: 'No hay solicitudes para exportar.', background: '#1e293b', color: '#f8fafc' });
     return;
   }
 
-  let csvContent = 'data:text/csv;charset=utf-8,ID,Titulo,Categoria,Descripcion,Estado\n';
+  let csvContent = 'data:text/csv;charset=utf-8,ID,Titulo,Categoria,Prioridad,Descripcion,Estado\n';
 
   solicitudesGlobal.forEach(row => {
     const tituloLimpio = `"${row.titulo.replace(/"/g, '""')}"`;
     const descLimpia = `"${row.descripcion.replace(/"/g, '""')}"`;
-    csvContent += `${row.id_solicitud},${tituloLimpio},"${row.categoria}",${descLimpia},"${row.estado}"\n`;
+    csvContent += `${row.id_solicitud},${tituloLimpio},"${row.categoria}","${row.prioridad || 'Media'}",${descLimpia},"${row.estado}"\n`;
   });
 
   const encodedUri = encodeURI(csvContent);
@@ -280,7 +290,6 @@ window.exportarCSV = function() {
   notificarToast('Reporte CSV descargado');
 };
 
-// Funciones Auxiliares de Notificaciones
 function notificarExito(mensaje) {
   Swal.fire({
     icon: 'success',

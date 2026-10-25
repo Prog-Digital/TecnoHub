@@ -12,115 +12,168 @@
   <!-- Chart.js para Gráficos Estadísticos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    :root {
+      --primary: #38bdf8;
+      --bg-main: #0b1120;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+    body {
+      background-color: var(--bg-main);
+      color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .dashboard-grid { grid-template-columns: 1fr; }
     }
-    .chart-container {
+    .card-custom {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: 1rem;
-      padding: 1.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .chart-box {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      max-height: 380px;
+      padding: 1.5rem;
+      position: relative;
     }
-    .controls-bar {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
+    /* Contenedor estricto para que la gráfica no se deforme */
+    .canvas-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      margin: 0 auto;
     }
-    .filter-group {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.02);
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">⚡ TECNOHUB</div>
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="dashboard.html" class="active">Panel CRUD</a>
-      <a href="login.html" class="btn" style="padding: 0.5rem 1rem;">Cerrar Sesión</a>
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 1px solid var(--border-color); background: rgba(11,17,32,0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;">
+    <div class="logo" style="font-weight: bold; font-size: 1.2rem; color: var(--primary);">⚡ TECNOHUB</div>
+    <nav style="display: flex; gap: 1.5rem; align-items: center;">
+      <a href="index.html" style="color: #cbd5e1; text-decoration: none;">Inicio</a>
+      <a href="dashboard.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Panel CRUD</a>
+      <a href="login.html" class="btn" style="background: #ef4444; color: white; padding: 0.4rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.9rem;">Cerrar Sesión</a>
     </nav>
   </header>
 
-  <main style="max-width: 1100px; margin: 2rem auto; padding: 0 1rem;">
+  <main style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
     <!-- Tarjetas de Métricas Resumen -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-      <div class="card" style="text-align: center; padding: 1.5rem;">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">Total Solicitudes</span>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+      <div class="card-custom" style="text-align: center; padding: 1.5rem;">
+        <span style="color: #94a3b8; font-size: 0.9rem;">Total Solicitudes</span>
         <h2 id="statTotal" style="font-size: 2.2rem; color: var(--primary); margin-top: 0.5rem;">0</h2>
       </div>
-      <div class="card" style="text-align: center; padding: 1.5rem;">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">Pendientes</span>
+      <div class="card-custom" style="text-align: center; padding: 1.5rem;">
+        <span style="color: #94a3b8; font-size: 0.9rem;">Pendientes</span>
         <h2 id="statPendientes" style="font-size: 2.2rem; color: #f59e0b; margin-top: 0.5rem;">0</h2>
       </div>
-      <div class="card" style="text-align: center; padding: 1.5rem;">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">Completadas</span>
+      <div class="card-custom" style="text-align: center; padding: 1.5rem;">
+        <span style="color: #94a3b8; font-size: 0.9rem;">Completadas</span>
         <h2 id="statCompletadas" style="font-size: 2.2rem; color: #10b981; margin-top: 0.5rem;">0</h2>
       </div>
     </div>
 
-    <!-- Sección Formulario y Gráfico Estadístico -->
+    <!-- Sección Formulario y Gráfico -->
     <div class="dashboard-grid">
       <!-- Formulario de Registro / Edición -->
-      <div class="card" style="padding: 2rem;">
-        <h2 style="margin-bottom: 1.5rem; color: var(--primary);" id="formTitle">Registrar / Editar Solicitud</h2>
+      <div class="card-custom" style="padding: 2rem;">
+        <h2 style="margin-bottom: 1.5rem; color: var(--primary); font-size: 1.4rem;" id="formTitle">📝 Registrar Requerimiento</h2>
         <form id="solicitudForm">
           <input type="hidden" id="solicitudId">
           
           <div style="margin-bottom: 1rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Título del Requerimiento</label>
-            <input type="text" id="titulo" placeholder="Ej: Mantenimiento Preventivo de Redes" required style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); color: #fff;">
+            <label style="display: block; margin-bottom: 0.4rem; color: #94a3b8; font-size: 0.9rem;">Título del Requerimiento</label>
+            <input type="text" id="titulo" placeholder="Ej: Mantenimiento Preventivo de Servidores" required>
           </div>
 
-          <div style="margin-bottom: 1rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Categoría</label>
-            <select id="categoria" required style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: #0f172a; border: 1px solid var(--border-color); color: #fff;">
-              <option value="">-- Seleccionar Categoría --</option>
-              <option value="Soporte Técnico">Soporte Técnico</option>
-              <option value="Desarrollo Web">Desarrollo Web</option>
-              <option value="Redes y Conectividad">Redes y Conectividad</option>
-              <option value="Mantenimiento Electromecánico">Mantenimiento Electromecánico</option>
-            </select>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; margin-bottom: 0.4rem; color: #94a3b8; font-size: 0.9rem;">Categoría</label>
+              <select id="categoria" required>
+                <option value="">-- Seleccionar --</option>
+                <option value="Soporte Técnico">Soporte Técnico</option>
+                <option value="Desarrollo Web">Desarrollo Web</option>
+                <option value="Redes y Conectividad">Redes y Conectividad</option>
+                <option value="Mantenimiento Electromecánico">Mantenimiento Electromecánico</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.4rem; color: #94a3b8; font-size: 0.9rem;">Prioridad</label>
+              <select id="prioridad" required>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+                <option value="Alta">Alta (Urgente)</option>
+              </select>
+            </div>
           </div>
 
           <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Descripción</label>
-            <textarea id="descripcion" rows="3" placeholder="Detalle los requerimientos del servicio..." required style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); color: #fff; resize: vertical;"></textarea>
+            <label style="display: block; margin-bottom: 0.4rem; color: #94a3b8; font-size: 0.9rem;">Descripción Detallada</label>
+            <textarea id="descripcion" rows="3" placeholder="Describa los detalles técnicos..." required></textarea>
           </div>
 
-          <button type="submit" id="btnGuardar" class="btn" style="width: 100%;">Guardar Solicitud</button>
+          <div style="display: flex; gap: 1rem;">
+            <button type="submit" id="btnGuardar" class="btn" style="flex: 2; background: var(--primary); color: #0b1120; font-weight: bold; padding: 0.75rem; border-radius: 0.5rem; border: none; cursor: pointer;">Guardar Solicitud</button>
+            <button type="button" onclick="limpiarFormulario()" class="btn" style="flex: 1; background: #334155; color: #fff; padding: 0.75rem; border-radius: 0.5rem; border: none; cursor: pointer;">Cancelar</button>
+          </div>
         </form>
       </div>
 
-      <!-- Gráfica Analítica Chart.js -->
-      <div class="chart-container">
+      <!-- Gráfica Analítica en Contenedor Fijo -->
+      <div class="card-custom chart-box">
         <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.1rem;">📊 Distribución por Estados</h3>
-        <canvas id="estadoChart" style="max-width: 280px; max-height: 280px;"></canvas>
+        <div class="canvas-wrapper">
+          <canvas id="estadoChart"></canvas>
+        </div>
       </div>
     </div>
 
-    <!-- Barra de Búsqueda, Filtros Avanzados y Exportación -->
-    <div class="controls-bar card" style="padding: 1rem;">
-      <div class="filter-group" style="flex: 1; min-width: 250px;">
-        <input type="text" id="busquedaInput" placeholder="🔍 Buscar por palabra clave..." style="padding: 0.5rem 0.8rem; border-radius: 0.5rem; background: #0f172a; border: 1px solid var(--border-color); color: #fff; flex: 1;">
-        
-        <select id="filtroEstado" style="padding: 0.5rem; border-radius: 0.5rem; background: #0f172a; border: 1px solid var(--border-color); color: #fff;">
+    <!-- Barra de Filtros y Exportación -->
+    <div class="card-custom" style="padding: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: 1rem; flex: 1; min-width: 280px; flex-wrap: wrap;">
+        <input type="text" id="busquedaInput" placeholder="🔍 Buscar por palabra clave..." style="flex: 1; padding: 0.5rem 0.8rem;">
+        <select id="filtroEstado" style="width: 160px; padding: 0.5rem;">
           <option value="TODOS">Todos los Estados</option>
           <option value="Pendiente">Pendiente</option>
           <option value="En Proceso">En Proceso</option>
@@ -128,25 +181,25 @@
         </select>
       </div>
 
-      <button onclick="exportarCSV()" class="btn" style="background-color: #10b981; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 0.5rem; cursor: pointer;">
-        📥 Exportar CSV
+      <button onclick="exportarCSV()" class="btn" style="background-color: #10b981; color: white; padding: 0.6rem 1.2rem; font-size: 0.9rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 600;">
+        📥 Exportar Reporte CSV
       </button>
     </div>
 
-    <!-- Tabla de Solicitudes Registradas -->
-    <div class="card" style="padding: 1.5rem; overflow-x: auto;">
-      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <!-- Tabla de Solicitudes -->
+    <div class="card-custom" style="padding: 1rem; overflow-x: auto;">
+      <table>
         <thead>
-          <tr style="border-bottom: 2px solid var(--border-color); color: var(--primary);">
-            <th style="padding: 0.75rem;">ID</th>
-            <th style="padding: 0.75rem;">Requerimiento / Descripción</th>
-            <th style="padding: 0.75rem;">Categoría</th>
-            <th style="padding: 0.75rem;">Estado</th>
-            <th style="padding: 0.75rem;">Acciones</th>
+          <tr>
+            <th>ID</th>
+            <th>Requerimiento / Detalles</th>
+            <th>Categoría / Prioridad</th>
+            <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaSolicitudes">
-          <!-- Carga Dinámica desde app.js -->
+          <!-- Datos dinámicos -->
         </tbody>
       </table>
     </div>

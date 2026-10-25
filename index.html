@@ -6,15 +6,22 @@
   <title>TecnoHub - Plataforma Tecnológica</title>
   <link rel="stylesheet" href="./style.css">
   <style>
-    /* Estilos avanzados para el Carrusel con Fondo de Imágenes */
+    /* Estilos sólidos y profesionales para las tarjetas */
+    .hero-card {
+      background: rgba(30, 41, 59, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
     .carrusel-container {
       position: relative;
       max-width: 900px;
-      margin: 2.5rem auto;
+      margin: 2rem auto;
       overflow: hidden;
       border-radius: 1rem;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
     }
     .carrusel-slide {
       display: none;
@@ -24,13 +31,12 @@
       background-position: center;
       position: relative;
     }
-    /* Capa oscura translúcida para que el texto resalte perfectamente */
+    /* Capa oscura sólida para garantizar que la imagen de fondo no opaque el texto */
     .carrusel-slide::before {
       content: '';
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(4px);
+      background: rgba(11, 17, 32, 0.88);
       z-index: 1;
     }
     .carrusel-content {
@@ -42,37 +48,39 @@
       animation: fadeIn 0.8s ease-in-out;
     }
     .carrusel-slide h3 {
-      color: var(--primary);
+      color: #38bdf8;
       font-size: 2rem;
       margin-bottom: 1rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
     }
     .carrusel-slide p {
-      color: #f8fafc;
+      color: #f1f5f9;
       font-size: 1.15rem;
       max-width: 650px;
       margin: 0 auto;
       line-height: 1.6;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
     .carrusel-dots {
       text-align: center;
       padding: 1rem 0;
-      background: var(--card-bg);
+      background: #1e293b;
       position: relative;
       z-index: 2;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
     .dot {
       display: inline-block;
       height: 12px;
       width: 12px;
       margin: 0 5px;
-      background-color: var(--text-muted);
+      background-color: #64748b;
       border-radius: 50%;
       cursor: pointer;
       transition: background-color 0.3s;
     }
     .dot.active {
-      background-color: var(--primary);
+      background-color: #38bdf8;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.98); }
@@ -91,18 +99,19 @@
   </header>
 
   <main style="padding: 0 1rem;">
-    <section class="card" style="text-align: center; padding: 3rem 1rem 1.5rem 1rem; max-width: 900px; margin: 2rem auto;">
-      <h1 style="font-size: 2.5rem; color: var(--primary);">Gestión Fluida de Servicios Tecnológicos</h1>
-      <p style="color: var(--text-muted); max-width: 650px; margin: 1rem auto; font-size: 1.1rem;">
+    <!-- Tarjeta Principal de Bienvenida -->
+    <section class="hero-card" style="text-align: center; padding: 3rem 1.5rem; max-width: 900px; margin: 2rem auto;">
+      <h1 style="font-size: 2.3rem; color: #38bdf8; margin-bottom: 1rem;">Gestión Fluida de Servicios Tecnológicos</h1>
+      <p style="color: #cbd5e1; max-width: 650px; margin: 0 auto 1.5rem auto; font-size: 1.1rem; line-height: 1.6;">
         Plataforma web desarrollada para la asignatura de Programación Digital (UNIPAZ). Conecta necesidades técnicas con soluciones eficientes en tiempo real.
       </p>
-      <a href="dashboard.html" class="btn" style="margin-top: 1rem; padding: 0.75rem 2rem; font-size: 1rem;">Ir al Panel CRUD</a>
+      <a href="dashboard.html" class="btn" style="padding: 0.75rem 2rem; font-size: 1rem; display: inline-block;">Ir al Panel CRUD</a>
     </section>
 
-    <!-- Carrusel Interactivo con Imágenes Profesionales de Fondo -->
+    <!-- Carrusel Interactivo con Fondos de Imágenes -->
     <div class="carrusel-container">
       
-      <!-- Slide 1: Soporte Técnico -->
+      <!-- Slide 1 -->
       <div class="carrusel-slide active" style="background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80');">
         <div class="carrusel-content">
           <h3>🛠️ Soporte Técnico Especializado</h3>
@@ -110,7 +119,7 @@
         </div>
       </div>
 
-      <!-- Slide 2: Desarrollo de Software -->
+      <!-- Slide 2 -->
       <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80');">
         <div class="carrusel-content">
           <h3>💻 Desarrollo de Software a Medida</h3>
@@ -118,7 +127,7 @@
         </div>
       </div>
 
-      <!-- Slide 3: Redes y Conectividad -->
+      <!-- Slide 3 -->
       <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80');">
         <div class="carrusel-content">
           <h3>🌐 Redes y Conectividad</h3>
@@ -126,7 +135,7 @@
         </div>
       </div>
 
-      <!-- Slide 4: Mantenimiento Electromecánico -->
+      <!-- Slide 4 -->
       <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80');">
         <div class="carrusel-content">
           <h3>⚙️ Sistemas Electromecánicos</h3>
@@ -134,7 +143,7 @@
         </div>
       </div>
 
-      <!-- Slide 5: Innovación y Bases de Datos -->
+      <!-- Slide 5 -->
       <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80');">
         <div class="carrusel-content">
           <h3>⚡ Base de Datos en Tiempo Real</h3>
@@ -142,7 +151,7 @@
         </div>
       </div>
 
-      <!-- Indicadores de puntos (Dots) -->
+      <!-- Indicadores -->
       <div class="carrusel-dots">
         <span class="dot active" onclick="currentSlide(0)"></span>
         <span class="dot" onclick="currentSlide(1)"></span>
@@ -154,7 +163,6 @@
   </main>
 
   <script>
-    // Lógica JavaScript optimizada para el carrusel de imágenes
     let slideIndex = 0;
     const slides = document.querySelectorAll('.carrusel-slide');
     const dots = document.querySelectorAll('.dot');
@@ -173,11 +181,10 @@
       dots[slideIndex - 1].classList.add('active');
     }
 
-    // Rotación automática cada 5 segundos
     slideInterval = setInterval(showSlides, 5000);
 
     function currentSlide(n) {
-      clearInterval(slideInterval); // Reinicia el tiempo si el usuario hace clic manualmente
+      clearInterval(slideInterval);
       slideIndex = n;
       slides.forEach((slide, index) => {
         slide.classList.remove('active');

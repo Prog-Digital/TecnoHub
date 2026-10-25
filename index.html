@@ -6,22 +6,36 @@
   <title>TecnoHub - Plataforma Tecnológica</title>
   <link rel="stylesheet" href="./style.css">
   <style>
-    /* Estilos específicos para el Carrusel de Servicios */
+    /* Estilos avanzados para el Carrusel con Fondo de Imágenes */
     .carrusel-container {
       position: relative;
-      max-width: 800px;
-      margin: 2rem auto;
+      max-width: 900px;
+      margin: 2.5rem auto;
       overflow: hidden;
       border-radius: 1rem;
       border: 1px solid var(--border-color);
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
     }
     .carrusel-slide {
       display: none;
-      padding: 3rem 2rem;
+      padding: 5rem 2rem;
       text-align: center;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    /* Capa oscura translúcida para que el texto resalte perfectamente */
+    .carrusel-slide::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(4px);
+      z-index: 1;
+    }
+    .carrusel-content {
+      position: relative;
+      z-index: 2;
     }
     .carrusel-slide.active {
       display: block;
@@ -29,24 +43,29 @@
     }
     .carrusel-slide h3 {
       color: var(--primary);
-      font-size: 1.8rem;
+      font-size: 2rem;
       margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
     .carrusel-slide p {
-      color: var(--text-muted);
-      font-size: 1.1rem;
-      max-width: 600px;
+      color: #f8fafc;
+      font-size: 1.15rem;
+      max-width: 650px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     .carrusel-dots {
       text-align: center;
-      padding-bottom: 1.5rem;
+      padding: 1rem 0;
+      background: var(--card-bg);
+      position: relative;
+      z-index: 2;
     }
     .dot {
       display: inline-block;
       height: 12px;
       width: 12px;
-      margin: 0 4px;
+      margin: 0 5px;
       background-color: var(--text-muted);
       border-radius: 50%;
       cursor: pointer;
@@ -56,8 +75,8 @@
       background-color: var(--primary);
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
@@ -71,49 +90,75 @@
     </nav>
   </header>
 
-  <main>
-    <section class="card" style="text-align: center; padding: 3rem 1rem 1rem 1rem;">
-      <h1 style="font-size: 2.3rem; color: var(--primary);">Gestión Fluida de Servicios Tecnológicos</h1>
-      <p style="color: var(--text-muted); max-width: 600px; margin: 1rem auto;">
+  <main style="padding: 0 1rem;">
+    <section class="card" style="text-align: center; padding: 3rem 1rem 1.5rem 1rem; max-width: 900px; margin: 2rem auto;">
+      <h1 style="font-size: 2.5rem; color: var(--primary);">Gestión Fluida de Servicios Tecnológicos</h1>
+      <p style="color: var(--text-muted); max-width: 650px; margin: 1rem auto; font-size: 1.1rem;">
         Plataforma web desarrollada para la asignatura de Programación Digital (UNIPAZ). Conecta necesidades técnicas con soluciones eficientes en tiempo real.
       </p>
-      <a href="dashboard.html" class="btn" style="margin-top: 1rem;">Ir al Panel CRUD</a>
+      <a href="dashboard.html" class="btn" style="margin-top: 1rem; padding: 0.75rem 2rem; font-size: 1rem;">Ir al Panel CRUD</a>
     </section>
 
-    <!-- Carrusel de Ideas y Servicios Ofrecidos -->
+    <!-- Carrusel Interactivo con Imágenes Profesionales de Fondo -->
     <div class="carrusel-container">
-      <div class="carrusel-slide active">
-        <h3>🛠️ Soporte Técnico Especializado</h3>
-        <p>Diagnóstico, mantenimiento preventivo y correctivo de equipos de cómputo y hardware institucional con respuesta ágil.</p>
-      </div>
-      <div class="carrusel-slide">
-        <h3>💻 Desarrollo de Software a Medida</h3>
-        <p>Soluciones web dinámicas y modernas integradas con bases de datos en tiempo real mediante arquitecturas seguras.</p>
-      </div>
-      <div class="carrusel-slide">
-        <h3>🌐 Redes y Conectividad</h3>
-        <p>Optimización, estructuración y control de redes locales para garantizar la estabilidad en los procesos operativos.</p>
-      </div>
-      <div class="carrusel-slide">
-        <h3>⚙️ Mantenimiento Electromecánico</h3>
-        <p>Control y gestión de requerimientos técnicos enfocados en sistemas industriales y electromecánicos avanzados.</p>
+      
+      <!-- Slide 1: Soporte Técnico -->
+      <div class="carrusel-slide active" style="background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80');">
+        <div class="carrusel-content">
+          <h3>🛠️ Soporte Técnico Especializado</h3>
+          <p>Diagnóstico avanzado, mantenimiento preventivo y correctivo de equipos de cómputo y hardware institucional con respuesta ágil.</p>
+        </div>
       </div>
 
-      <!-- Indicadores de puntos -->
+      <!-- Slide 2: Desarrollo de Software -->
+      <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80');">
+        <div class="carrusel-content">
+          <h3>💻 Desarrollo de Software a Medida</h3>
+          <p>Soluciones web dinámicas y modernas integradas con bases de datos en tiempo real mediante arquitecturas seguras y escalables.</p>
+        </div>
+      </div>
+
+      <!-- Slide 3: Redes y Conectividad -->
+      <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80');">
+        <div class="carrusel-content">
+          <h3>🌐 Redes y Conectividad</h3>
+          <p>Optimización, estructuración y control de redes locales e inalámbricas para garantizar máxima estabilidad en los procesos operativos.</p>
+        </div>
+      </div>
+
+      <!-- Slide 4: Mantenimiento Electromecánico -->
+      <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80');">
+        <div class="carrusel-content">
+          <h3>⚙️ Sistemas Electromecánicos</h3>
+          <p>Control y gestión de requerimientos técnicos enfocados en sistemas industriales, automatización y mantenimiento especializado.</p>
+        </div>
+      </div>
+
+      <!-- Slide 5: Innovación y Bases de Datos -->
+      <div class="carrusel-slide" style="background-image: url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80');">
+        <div class="carrusel-content">
+          <h3>⚡ Base de Datos en Tiempo Real</h3>
+          <p>Sincronización instantánea con Supabase y PostgreSQL para un control absoluto de cada requerimiento registrado en la plataforma.</p>
+        </div>
+      </div>
+
+      <!-- Indicadores de puntos (Dots) -->
       <div class="carrusel-dots">
         <span class="dot active" onclick="currentSlide(0)"></span>
         <span class="dot" onclick="currentSlide(1)"></span>
         <span class="dot" onclick="currentSlide(2)"></span>
         <span class="dot" onclick="currentSlide(3)"></span>
+        <span class="dot" onclick="currentSlide(4)"></span>
       </div>
     </div>
   </main>
 
   <script>
-    // Lógica JavaScript para automatizar el carrusel
+    // Lógica JavaScript optimizada para el carrusel de imágenes
     let slideIndex = 0;
     const slides = document.querySelectorAll('.carrusel-slide');
     const dots = document.querySelectorAll('.dot');
+    let slideInterval;
 
     function showSlides() {
       slides.forEach((slide, index) => {
@@ -126,11 +171,13 @@
       
       slides[slideIndex - 1].classList.add('active');
       dots[slideIndex - 1].classList.add('active');
-      
-      setTimeout(showSlides, 4000); // Cambia de tarjeta cada 4 segundos
     }
 
+    // Rotación automática cada 5 segundos
+    slideInterval = setInterval(showSlides, 5000);
+
     function currentSlide(n) {
+      clearInterval(slideInterval); // Reinicia el tiempo si el usuario hace clic manualmente
       slideIndex = n;
       slides.forEach((slide, index) => {
         slide.classList.remove('active');
@@ -138,10 +185,8 @@
       });
       slides[slideIndex].classList.add('active');
       dots[slideIndex].classList.add('active');
+      slideInterval = setInterval(showSlides, 5000);
     }
-
-    // Iniciar el carrusel automático
-    setTimeout(showSlides, 4000);
   </script>
 </body>
 </html>

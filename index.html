@@ -4,7 +4,62 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TecnoHub - Plataforma Tecnológica</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    /* Estilos específicos para el Carrusel de Servicios */
+    .carrusel-container {
+      position: relative;
+      max-width: 800px;
+      margin: 2rem auto;
+      overflow: hidden;
+      border-radius: 1rem;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .carrusel-slide {
+      display: none;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .carrusel-slide.active {
+      display: block;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    .carrusel-slide h3 {
+      color: var(--primary);
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .carrusel-slide p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .carrusel-dots {
+      text-align: center;
+      padding-bottom: 1.5rem;
+    }
+    .dot {
+      display: inline-block;
+      height: 12px;
+      width: 12px;
+      margin: 0 4px;
+      background-color: var(--text-muted);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .dot.active {
+      background-color: var(--primary);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -17,13 +72,76 @@
   </header>
 
   <main>
-    <section class="card" style="text-align: center; padding: 4rem 2rem;">
-      <h1 style="font-size: 2.5rem; color: var(--primary);">Gestión Fluida de Servicios Tecnológicos</h1>
-      <p style="color: var(--text-muted); max-width: 600px; margin: 1rem auto 2rem auto;">
+    <section class="card" style="text-align: center; padding: 3rem 1rem 1rem 1rem;">
+      <h1 style="font-size: 2.3rem; color: var(--primary);">Gestión Fluida de Servicios Tecnológicos</h1>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 1rem auto;">
         Plataforma web desarrollada para la asignatura de Programación Digital (UNIPAZ). Conecta necesidades técnicas con soluciones eficientes en tiempo real.
       </p>
-      <a href="dashboard.html" class="btn">Ir al Panel CRUD</a>
+      <a href="dashboard.html" class="btn" style="margin-top: 1rem;">Ir al Panel CRUD</a>
     </section>
+
+    <!-- Carrusel de Ideas y Servicios Ofrecidos -->
+    <div class="carrusel-container">
+      <div class="carrusel-slide active">
+        <h3>🛠️ Soporte Técnico Especializado</h3>
+        <p>Diagnóstico, mantenimiento preventivo y correctivo de equipos de cómputo y hardware institucional con respuesta ágil.</p>
+      </div>
+      <div class="carrusel-slide">
+        <h3>💻 Desarrollo de Software a Medida</h3>
+        <p>Soluciones web dinámicas y modernas integradas con bases de datos en tiempo real mediante arquitecturas seguras.</p>
+      </div>
+      <div class="carrusel-slide">
+        <h3>🌐 Redes y Conectividad</h3>
+        <p>Optimización, estructuración y control de redes locales para garantizar la estabilidad en los procesos operativos.</p>
+      </div>
+      <div class="carrusel-slide">
+        <h3>⚙️ Mantenimiento Electromecánico</h3>
+        <p>Control y gestión de requerimientos técnicos enfocados en sistemas industriales y electromecánicos avanzados.</p>
+      </div>
+
+      <!-- Indicadores de puntos -->
+      <div class="carrusel-dots">
+        <span class="dot active" onclick="currentSlide(0)"></span>
+        <span class="dot" onclick="currentSlide(1)"></span>
+        <span class="dot" onclick="currentSlide(2)"></span>
+        <span class="dot" onclick="currentSlide(3)"></span>
+      </div>
+    </div>
   </main>
+
+  <script>
+    // Lógica JavaScript para automatizar el carrusel
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.carrusel-slide');
+    const dots = document.querySelectorAll('.dot');
+
+    function showSlides() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        dots[index].classList.remove('active');
+      });
+      
+      slideIndex++;
+      if (slideIndex > slides.length) { slideIndex = 1; }
+      
+      slides[slideIndex - 1].classList.add('active');
+      dots[slideIndex - 1].classList.add('active');
+      
+      setTimeout(showSlides, 4000); // Cambia de tarjeta cada 4 segundos
+    }
+
+    function currentSlide(n) {
+      slideIndex = n;
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        dots[index].classList.remove('active');
+      });
+      slides[slideIndex].classList.add('active');
+      dots[slideIndex].classList.add('active');
+    }
+
+    // Iniciar el carrusel automático
+    setTimeout(showSlides, 4000);
+  </script>
 </body>
 </html>

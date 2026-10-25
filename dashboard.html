@@ -4,9 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TecnoHub - Panel de Gestión</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Cliente JS de Supabase -->
+  <link rel="stylesheet" href="./style.css">
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Supabase JS Client CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Chart.js para Gráficos Estadísticos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 768px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+    .chart-container {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-height: 380px;
+    }
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .filter-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -18,79 +58,100 @@
     </nav>
   </header>
 
-  <main>
-    <!-- Formulario Crear/Editar -->
-     <!-- Tarjetas de Métricas Resumen -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-  <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
-    <p style="color: var(--text-muted); font-size: 0.9rem;">Total Solicitudes</p>
-    <h3 id="statTotal" style="font-size: 1.8rem; color: var(--primary); margin: 0.25rem 0 0 0;">0</h3>
-  </div>
-  <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
-    <p style="color: var(--text-muted); font-size: 0.9rem;">Pendientes</p>
-    <h3 id="statPendientes" style="font-size: 1.8rem; color: var(--warning); margin: 0.25rem 0 0 0;">0</h3>
-  </div>
-  <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
-    <p style="color: var(--text-muted); font-size: 0.9rem;">Completadas</p>
-    <h3 id="statCompletadas" style="font-size: 1.8rem; color: var(--success); margin: 0.25rem 0 0 0;">0</h3>
-  </div>
-</div>
-    <section class="card">
-      <h2>Registrar / Editar Solicitud</h2>
-      <form id="solicitudForm">
-        <input type="hidden" id="solicitudId">
-        <div class="form-group">
-          <label for="titulo">Título del Requerimiento</label>
-          <input type="text" id="titulo" required placeholder="Ej: Mantenimiento Preventivo de Redes">
-        </div>
-        <div class="form-group">
-          <label for="categoria">Categoría</label>
-          <select id="categoria" required>
-            <option value="">-- Seleccionar Categoría --</option>
-            <option value="Soporte Técnico">Soporte Técnico</option>
-            <option value="Desarrollo Software">Desarrollo Software</option>
-            <option value="Redes y Conectividad">Redes y Conectividad</option>
-            <option value="Mantenimiento Electromecánico">Mantenimiento Electromecánico</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="descripcion">Descripción</label>
-          <textarea id="descripcion" rows="3" required placeholder="Detalle los requerimientos del servicio..."></textarea>
-        </div>
-        <button type="submit" class="btn" id="btnGuardar">Guardar Solicitud</button>
-      </form>
-    </section>
+  <main style="max-width: 1100px; margin: 2rem auto; padding: 0 1rem;">
+    <!-- Tarjetas de Métricas Resumen -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+      <div class="card" style="text-align: center; padding: 1.5rem;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Total Solicitudes</span>
+        <h2 id="statTotal" style="font-size: 2.2rem; color: var(--primary); margin-top: 0.5rem;">0</h2>
+      </div>
+      <div class="card" style="text-align: center; padding: 1.5rem;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Pendientes</span>
+        <h2 id="statPendientes" style="font-size: 2.2rem; color: #f59e0b; margin-top: 0.5rem;">0</h2>
+      </div>
+      <div class="card" style="text-align: center; padding: 1.5rem;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Completadas</span>
+        <h2 id="statCompletadas" style="font-size: 2.2rem; color: #10b981; margin-top: 0.5rem;">0</h2>
+      </div>
+    </div>
 
-    <!-- Tabla y Búsqueda -->
-    <section class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-        <h2>Solicitudes Registradas</h2>
-        <input type="text" id="busquedaInput" placeholder="Buscar..." style="max-width: 250px;">
+    <!-- Sección Formulario y Gráfico Estadístico -->
+    <div class="dashboard-grid">
+      <!-- Formulario de Registro / Edición -->
+      <div class="card" style="padding: 2rem;">
+        <h2 style="margin-bottom: 1.5rem; color: var(--primary);" id="formTitle">Registrar / Editar Solicitud</h2>
+        <form id="solicitudForm">
+          <input type="hidden" id="solicitudId">
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Título del Requerimiento</label>
+            <input type="text" id="titulo" placeholder="Ej: Mantenimiento Preventivo de Redes" required style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); color: #fff;">
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Categoría</label>
+            <select id="categoria" required style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: #0f172a; border: 1px solid var(--border-color); color: #fff;">
+              <option value="">-- Seleccionar Categoría --</option>
+              <option value="Soporte Técnico">Soporte Técnico</option>
+              <option value="Desarrollo Web">Desarrollo Web</option>
+              <option value="Redes y Conectividad">Redes y Conectividad</option>
+              <option value="Mantenimiento Electromecánico">Mantenimiento Electromecánico</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Descripción</label>
+            <textarea id="descripcion" rows="3" placeholder="Detalle los requerimientos del servicio..." required style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); color: #fff; resize: vertical;"></textarea>
+          </div>
+
+          <button type="submit" id="btnGuardar" class="btn" style="width: 100%;">Guardar Solicitud</button>
+        </form>
       </div>
-      
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Título y Descripción</th>
-              <th>Categoría</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tablaSolicitudes">
-            <!-- Cargado por app.js -->
-          </tbody>
-        </table>
+
+      <!-- Gráfica Analítica Chart.js -->
+      <div class="chart-container">
+        <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.1rem;">📊 Distribución por Estados</h3>
+        <canvas id="estadoChart" style="max-width: 280px; max-height: 280px;"></canvas>
       </div>
-    </section>
+    </div>
+
+    <!-- Barra de Búsqueda, Filtros Avanzados y Exportación -->
+    <div class="controls-bar card" style="padding: 1rem;">
+      <div class="filter-group" style="flex: 1; min-width: 250px;">
+        <input type="text" id="busquedaInput" placeholder="🔍 Buscar por palabra clave..." style="padding: 0.5rem 0.8rem; border-radius: 0.5rem; background: #0f172a; border: 1px solid var(--border-color); color: #fff; flex: 1;">
+        
+        <select id="filtroEstado" style="padding: 0.5rem; border-radius: 0.5rem; background: #0f172a; border: 1px solid var(--border-color); color: #fff;">
+          <option value="TODOS">Todos los Estados</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="En Proceso">En Proceso</option>
+          <option value="Completada">Completada</option>
+        </select>
+      </div>
+
+      <button onclick="exportarCSV()" class="btn" style="background-color: #10b981; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 0.5rem; cursor: pointer;">
+        📥 Exportar CSV
+      </button>
+    </div>
+
+    <!-- Tabla de Solicitudes Registradas -->
+    <div class="card" style="padding: 1.5rem; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border-color); color: var(--primary);">
+            <th style="padding: 0.75rem;">ID</th>
+            <th style="padding: 0.75rem;">Requerimiento / Descripción</th>
+            <th style="padding: 0.75rem;">Categoría</th>
+            <th style="padding: 0.75rem;">Estado</th>
+            <th style="padding: 0.75rem;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaSolicitudes">
+          <!-- Carga Dinámica desde app.js -->
+        </tbody>
+      </table>
+    </div>
   </main>
 
-  <script src="app.js"></script>
-
-  <!-- SweetAlert2 CDN para notificaciones estéticas -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>

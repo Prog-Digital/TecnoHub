@@ -5,11 +5,15 @@ const SUPABASE_ANON_KEY = 'sb_publishable_ASvOTj8NswAJpYyPkw9SNw_5zB4_pOS';
 // Inicialización del Cliente Oficial de Supabase
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Variables globales para datos y gráficos
+let solicitudesGlobal = [];
+let miGraficoChart = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('tablaSolicitudes')) {
     obtenerSolicitudes();
 
-    // Guardar (Crear o Editar)
+    // Evento Submit: Guardar (Crear o Editar)
     const form = document.getElementById('solicitudForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -23,29 +27,25 @@ document.addEventListener('DOMContentLoaded', () => {
         Swal.fire({
           icon: 'warning',
           title: 'Campos incompletos',
-          text: 'Por favor complete todos los campos del formulario.',
+          text: 'Por favor complete todos los campos requeridos.',
+          background: '#1e293b',
+          color: '#f8fafc',
           confirmButtonColor: '#38bdf8'
         });
         return;
       }
 
       if (id) {
-        // ACTUALIZAR (Edit)
+        // ACTUALIZAR (Update)
         const { error } = await supabaseClient
           .from('solicitudes')
           .update({ titulo, categoria, descripcion })
           .eq('id_solicitud', id);
 
         if (error) {
-          Swal.fire({ icon: 'error', title: 'Error', text: error.message, confirmButtonColor: '#38bdf8' });
+          Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1e293b', color: '#f8fafc' });
         } else {
-          Swal.fire({
-            icon: 'success',
-            title: '¡Actualizado!',
-            text: 'La solicitud se actualizó exitosamente.',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          notificarExito('¡Solicitud actualizada con éxito!');
         }
       } else {
         // CREAR (Insert)
@@ -54,15 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
           .insert([{ titulo, categoria, descripcion, estado: 'Pendiente' }]);
 
         if (error) {
-          Swal.fire({ icon: 'error', title: 'Error', text: error.message, confirmButtonColor: '#38bdf8' });
+          Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1e293b', color: '#f8fafc' });
         } else {
-          Swal.fire({
-            icon: 'success',
-            title: '¡Registrado!',
-            text: 'La solicitud se registró exitosamente.',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          notificarExito('¡Solicitud registrada correctamente!');
         }
       }
 
@@ -72,28 +66,17 @@ document.addEventListener('DOMContentLoaded', () => {
       obtenerSolicitudes();
     });
 
-    // Búsqueda en tiempo real
-    const busquedaInput = document.getElementById('busquedaInput');
-    if (busquedaInput) {
-      busquedaInput.addEventListener('input', (e) => {
-        const termino = e.target.value.toLowerCase();
-        const filas = document.querySelectorAll('#tablaSolicitudes tr');
-        
-        filas.forEach((fila) => {
-          const textoFila = fila.textContent.toLowerCase();
-          fila.style.display = textoFila.includes(termino) ? '' : 'none';
-        });
-      });
-    }
+    // Listeners de Filtros y Búsqueda en Tiempo Real
+    document.getElementById('busquedaInput')?.addEventListener('input', aplicarFiltros);
+    document.getElementById('filtroEstado')?.addEventListener('change', aplicarFiltros);
   }
 });
 
-// LISTAR Registros (Select con Spinner de Carga)
+// LISTAR Registros desde Supabase
 async function obtenerSolicitudes() {
   const tbody = document.getElementById('tablaSolicitudes');
   if (!tbody) return;
 
-  // Mostrar alerta de carga estética con SweetAlert2
   Swal.fire({
     title: 'Cargando datos...',
     text: 'Conectando con Supabase',
@@ -110,10 +93,7 @@ async function obtenerSolicitudes() {
     .select('*')
     .order('id_solicitud', { ascending: false });
 
-  // Cerrar el spinner de carga automáticamente al recibir respuesta
   Swal.close();
-
-  tbody.innerHTML = '';
 
   if (error) {
     console.error('Error:', error.message);
@@ -121,32 +101,36 @@ async function obtenerSolicitudes() {
     return;
   }
 
-  // Actualizar indicadores numéricos en las tarjetas superiores
-  if (document.getElementById('statTotal')) {
-    document.getElementById('statTotal').textContent = data.length;
-    document.getElementById('statPendientes').textContent = data.filter(s => s.estado === 'Pendiente').length;
-    document.getElementById('statCompletadas').textContent = data.filter(s => s.estado === 'Completada').length;
-  }
+  solicitudesGlobal = data || [];
+  actualizarMetricasYGrafico(solicitudesGlobal);
+  aplicarFiltros();
+}
 
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No hay solicitudes registradas. ¡Crea la primera!</td></tr>`;
+// Renderizar la tabla basada en filtros
+function renderizarTabla(datos) {
+  const tbody = document.getElementById('tablaSolicitudes');
+  tbody.innerHTML = '';
+
+  if (datos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 2rem;">No se encontraron solicitudes registradas.</td></tr>`;
     return;
   }
 
-  data.forEach((item) => {
+  datos.forEach((item) => {
     const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--border-color)';
     tr.innerHTML = `
-      <td>#${item.id_solicitud}</td>
-      <td><strong>${item.titulo}</strong><br><small style="color:var(--text-muted);">${item.descripcion}</small></td>
-      <td>${item.categoria}</td>
-      <td>
-        <select onchange="cambiarEstado(${item.id_solicitud}, this.value)" style="padding: 0.2rem 0.4rem; font-size: 0.85rem; border-radius: 0.25rem; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.1);">
+      <td style="padding: 0.75rem;">#${item.id_solicitud}</td>
+      <td style="padding: 0.75rem;"><strong>${item.titulo}</strong><br><small style="color:var(--text-muted);">${item.descripcion}</small></td>
+      <td style="padding: 0.75rem;">${item.categoria}</td>
+      <td style="padding: 0.75rem;">
+        <select onchange="cambiarEstado(${item.id_solicitud}, this.value)" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; border-radius: 0.25rem; background: #0f172a; color: #f8fafc; border: 1px solid var(--border-color);">
           <option value="Pendiente" ${item.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
           <option value="En Proceso" ${item.estado === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
           <option value="Completada" ${item.estado === 'Completada' ? 'selected' : ''}>Completada</option>
         </select>
       </td>
-      <td>
+      <td style="padding: 0.75rem;">
         <button onclick="prepararEdicion(${item.id_solicitud}, '${item.titulo.replace(/'/g, "\\'")}', '${item.categoria}', '${item.descripcion.replace(/'/g, "\\'")}')" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">Editar</button>
         <button onclick="eliminarSolicitud(${item.id_solicitud})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-left: 0.25rem;">Eliminar</button>
       </td>
@@ -155,7 +139,67 @@ async function obtenerSolicitudes() {
   });
 }
 
-// Cambiar estado desde el selector de la tabla
+// Aplicar filtros combinados (Texto + Estado)
+function aplicarFiltros() {
+  const termino = document.getElementById('busquedaInput')?.value.toLowerCase() || '';
+  const estadoFiltro = document.getElementById('filtroEstado')?.value || 'TODOS';
+
+  const filtrados = solicitudesGlobal.filter(item => {
+    const coincideTexto = item.titulo.toLowerCase().includes(termino) || 
+                          item.descripcion.toLowerCase().includes(termino) || 
+                          item.categoria.toLowerCase().includes(termino);
+    
+    const coincideEstado = (estadoFiltro === 'TODOS') || (item.estado === estadoFiltro);
+
+    return coincideTexto && coincideEstado;
+  });
+
+  renderizarTabla(filtrados);
+}
+
+// Actualizar Tarjetas Numericas y Gráfico de Torta (Chart.js)
+function actualizarMetricasYGrafico(data) {
+  const pendientes = data.filter(s => s.estado === 'Pendiente').length;
+  const enProceso = data.filter(s => s.estado === 'En Proceso').length;
+  const completadas = data.filter(s => s.estado === 'Completada').length;
+
+  if (document.getElementById('statTotal')) {
+    document.getElementById('statTotal').textContent = data.length;
+    document.getElementById('statPendientes').textContent = pendientes;
+    document.getElementById('statCompletadas').textContent = completadas;
+  }
+
+  // Renderizar o actualizar Chart.js
+  const ctx = document.getElementById('estadoChart');
+  if (!ctx) return;
+
+  if (miGraficoChart) {
+    miGraficoChart.destroy();
+  }
+
+  miGraficoChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pendientes', 'En Proceso', 'Completadas'],
+      datasets: [{
+        data: [pendientes, enProceso, completadas],
+        backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
+        borderWidth: 2,
+        borderColor: '#1e293b'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: { color: '#f8fafc' }
+        }
+      }
+    }
+  });
+}
+
+// Cambiar Estado desde la Tabla
 window.cambiarEstado = async function(id, nuevoEstado) {
   const { error } = await supabaseClient
     .from('solicitudes')
@@ -163,23 +207,14 @@ window.cambiarEstado = async function(id, nuevoEstado) {
     .eq('id_solicitud', id);
 
   if (error) {
-    Swal.fire({ icon: 'error', title: 'Error', text: error.message, confirmButtonColor: '#38bdf8' });
+    Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1e293b', color: '#f8fafc' });
   } else {
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'success',
-      title: 'Estado actualizado',
-      showConfirmButton: false,
-      timer: 1500,
-      background: '#1e293b',
-      color: '#f8fafc'
-    });
+    notificarToast('Estado actualizado');
     obtenerSolicitudes();
   }
 };
 
-// Cargar datos al formulario para editar
+// Cargar Datos al Formulario para Editar
 window.prepararEdicion = function (id, titulo, categoria, descripcion) {
   document.getElementById('solicitudId').value = id;
   document.getElementById('titulo').value = titulo;
@@ -189,11 +224,11 @@ window.prepararEdicion = function (id, titulo, categoria, descripcion) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// ELIMINAR Registro (Delete con SweetAlert2 Confirm)
+// Eliminar Solicitud con Confirmación
 window.eliminarSolicitud = async function (id) {
   Swal.fire({
     title: '¿Estás seguro?',
-    text: `¿Deseas eliminar la solicitud #${id}? Esta acción no se puede deshacer.`,
+    text: `¿Deseas eliminar la solicitud #${id}? Esta acción es irreversible.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#ef4444',
@@ -210,19 +245,62 @@ window.eliminarSolicitud = async function (id) {
         .eq('id_solicitud', id);
 
       if (error) {
-        Swal.fire({ icon: 'error', title: 'Error', text: error.message, confirmButtonColor: '#38bdf8' });
+        Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1e293b', color: '#f8fafc' });
       } else {
-        Swal.fire({
-          icon: 'success',
-          title: '¡Eliminado!',
-          text: 'La solicitud ha sido borrada correctamente.',
-          timer: 2000,
-          showConfirmButton: false,
-          background: '#1e293b',
-          color: '#f8fafc'
-        });
+        notificarExito('Solicitud eliminada.');
         obtenerSolicitudes();
       }
     }
   });
 };
+
+// Exportar Datos de la Tabla a Archivo CSV (Excel)
+window.exportarCSV = function() {
+  if (solicitudesGlobal.length === 0) {
+    Swal.fire({ icon: 'info', title: 'Sin datos', text: 'No hay solicitudes para exportar.', background: '#1e293b', color: '#f8fafc' });
+    return;
+  }
+
+  let csvContent = 'data:text/csv;charset=utf-8,ID,Titulo,Categoria,Descripcion,Estado\n';
+
+  solicitudesGlobal.forEach(row => {
+    const tituloLimpio = `"${row.titulo.replace(/"/g, '""')}"`;
+    const descLimpia = `"${row.descripcion.replace(/"/g, '""')}"`;
+    csvContent += `${row.id_solicitud},${tituloLimpio},"${row.categoria}",${descLimpia},"${row.estado}"\n`;
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `TecnoHub_Reporte_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  notificarToast('Reporte CSV descargado');
+};
+
+// Funciones Auxiliares de Notificaciones
+function notificarExito(mensaje) {
+  Swal.fire({
+    icon: 'success',
+    title: mensaje,
+    timer: 2000,
+    showConfirmButton: false,
+    background: '#1e293b',
+    color: '#f8fafc'
+  });
+}
+
+function notificarToast(mensaje) {
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: mensaje,
+    showConfirmButton: false,
+    timer: 2000,
+    background: '#1e293b',
+    color: '#f8fafc'
+  });
+}

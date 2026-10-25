@@ -93,17 +93,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// LISTAR Registros (Select)
+// LISTAR Registros (Select con Spinner de Carga)
 async function obtenerSolicitudes() {
   const tbody = document.getElementById('tablaSolicitudes');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando datos...</td></tr>';
+  // Mostrar alerta de carga estética con SweetAlert2
+  Swal.fire({
+    title: 'Cargando datos...',
+    text: 'Conectando con Supabase',
+    allowOutsideClick: false,
+    background: '#1e293b',
+    color: '#f8fafc',
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
 
   const { data, error } = await supabaseClient
     .from('solicitudes')
     .select('*')
     .order('id_solicitud', { ascending: false });
+
+  // Cerrar el spinner de carga automáticamente al recibir respuesta
+  Swal.close();
 
   tbody.innerHTML = '';
 
@@ -111,6 +124,13 @@ async function obtenerSolicitudes() {
     console.error('Error:', error.message);
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--danger);">Error al cargar datos desde Supabase.</td></tr>`;
     return;
+  }
+
+  // Actualizar indicadores numéricos en las tarjetas superiores
+  if (document.getElementById('statTotal')) {
+    document.getElementById('statTotal').textContent = data.length;
+    document.getElementById('statPendientes').textContent = data.filter(s => s.estado === 'Pendiente').length;
+    document.getElementById('statCompletadas').textContent = data.filter(s => s.estado === 'Completada').length;
   }
 
   if (data.length === 0) {
@@ -124,7 +144,13 @@ async function obtenerSolicitudes() {
       <td>#${item.id_solicitud}</td>
       <td><strong>${item.titulo}</strong><br><small style="color:var(--text-muted);">${item.descripcion}</small></td>
       <td>${item.categoria}</td>
-      <td><span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; background: rgba(56, 189, 248, 0.1); color: var(--primary);">${item.estado}</span></td>
+      <td>
+        <select onchange="cambiarEstado(${item.id_solicitud}, this.value)" style="padding: 0.2rem 0.4rem; font-size: 0.85rem; border-radius: 0.25rem;">
+          <option value="Pendiente" ${item.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+          <option value="En Proceso" ${item.estado === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+          <option value="Completada" ${item.estado === 'Completada' ? 'selected' : ''}>Completada</option>
+        </select>
+      </td>
       <td>
         <button onclick="prepararEdicion(${item.id_solicitud}, '${item.titulo.replace(/'/g, "\\'")}', '${item.categoria}', '${item.descripcion.replace(/'/g, "\\'")}')" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">Editar</button>
         <button onclick="eliminarSolicitud(${item.id_solicitud})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-left: 0.25rem;">Eliminar</button>
